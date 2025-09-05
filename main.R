@@ -1,4 +1,4 @@
-base1 <- read.csv2("precotaxatesourodireto.csv")
+base1 <- read.csv2("data/precotaxatesourodireto.csv")
 
 library(dplyr)
 library(lubridate)
@@ -10,6 +10,7 @@ base1 <- base1 %>%
 library(dplyr)
 library(tidyr)
 library(lubridate)
+library(stringr)
 
 # Criar identificador único (Tipo.Titulo + ano de vencimento)
 base1 <- base1 |>
@@ -18,13 +19,23 @@ base1 <- base1 |>
     id_titulo = paste(Tipo.Titulo, ano_venc)
   )
 
+# Filtrar apenas títulos desejados
+base1 <- base1 |>
+  filter(
+    str_starts(Tipo.Titulo, "Tesouro Selic") |
+      str_starts(Tipo.Titulo, "Tesouro IPCA") |
+      str_starts(Tipo.Titulo, "Tesouro IGPM")
+  )
+
 # Selecionar apenas as colunas relevantes para pivotagem
 base_long <- base1 |>
-  select(Data.Base, id_titulo, 
-         taxa_compra = Taxa.Compra.Manha, 
-         taxa_venda = Taxa.Venda.Manha,
-         pu_compra = PU.Compra.Manha, 
-         pu_venda = PU.Venda.Manha)
+  select(
+    Data.Base, id_titulo, 
+    taxa_compra = Taxa.Compra.Manha, 
+    taxa_venda = Taxa.Venda.Manha,
+    pu_compra = PU.Compra.Manha, 
+    pu_venda = PU.Venda.Manha
+  )
 
 # Pivotar para wide
 base_wide <- base_long |>
